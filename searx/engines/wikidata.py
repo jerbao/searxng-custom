@@ -829,19 +829,7 @@ def debug_explain_wikidata_query(query: str, method: str = "GET"):
 def init(_):
     global CACHE  # pylint: disable=global-statement
     CACHE = EngineCache("wikidata")
-
-    # In an environment with competing processes, the initial loading of the
-    # cache is required only once.
-    eng_state: str | None = CACHE.get("eng_state")
-    if not eng_state or not eng_state.startswith("STATE:"):
-        CACHE.set("eng_state", f"STATE: being initialized by PID {os.getpid()}")
-        try:
-            init_wikidata_properties()
-        except Exception:
-            CACHE.set("eng_state", f"ERROR: initialization by PID {os.getpid()} failed.")
-            raise
-    else:
-        logger.debug(eng_state)
+    init_wikidata_properties()
 
 
 def init_wikidata_properties():
