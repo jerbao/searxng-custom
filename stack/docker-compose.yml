@@ -1,15 +1,26 @@
 # SearXNG stack for Firecrawl integration
+# Builds the SearXNG image from this fork's source (with wikidata + cache
+# patches) using the project's own 2-stage Dockerfile pair
+# (container/builder.dockerfile + container/dist.dockerfile). Output tag
+# defaults to localhost/searxng-custom/searxng:dev so it doesn't collide
+# with the upstream docker.io/searxng/searxng image.
+#
 # Connects to the "backend" docker network that Firecrawl already manages,
-# so Firecrawl's api container can reach SearXNG at http://searxng-core:8080
-# without exposing it on the host.
+# so Firecrawl-api can reach SearXNG at http://searxng-core:8080 without
+# exposing it on the host.
 #
 # Usage on VM 1 (after Firecrawl stack is already running):
 #   cd ~/.services/searxng             # copy this stack/ dir here
 #   cp .env.example .env                # then edit SEARXNG_SECRET
+#   docker compose build searxng-core    # builds ~3-5 min from source
 #   docker compose up -d
 #   # test:
 #   docker exec firecrawl-api-1 curl -sS 'http://searxng-core:8080/search?q=firecrawl&format=json' | head -c 500
 name: searxng
+
+x-sxng-build-common: &sxng-build-common
+  context: ../..       # repo root (one above stack/)
+  dockerfile: container/dist.dockerfile
 
 services:
   valkey:
@@ -24,7 +35,11 @@ services:
 
   searxng-core:
     container_name: searxng-core
-    image: docker.io/searxng/searxng:${SEARXNG_VERSION:-latest}
+    build:
+      <<: *sxng-build-common
+      tags:
+        - localhost/searxng-custom/searxng:dev
+    image: localhost/searxng-custom/searxng:dev
     restart: unless-stopped
     # NOTE: no `ports:` here. SearXNG is only reachable from containers on
     # the shared "backend" network. Firecrawl-api resolves it as
