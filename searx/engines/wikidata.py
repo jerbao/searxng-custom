@@ -448,9 +448,14 @@ WDAttrList = list[WDAttrType]
 
 def get_headers() -> dict[str, str]:
     # user agent: https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits
+    # Wikimedia also requires Api-User-Agent for self-hosted bots; without
+    # it the SPARQL endpoint returns HTTP 403 suspended_time=180 (see
+    # https://meta.wikimedia.org/wiki/User-Agent_policy).
+    ua = searxng_useragent()
     return {
         "Accept": "application/sparql-results+json",
-        "User-Agent": f"wikidata engine - {searxng_useragent()}",
+        "User-Agent": f"wikidata engine - {ua}",
+        "Api-User-Agent": ua,
     }
 
 
