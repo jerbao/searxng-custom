@@ -1,0 +1,49 @@
+# SearXNG stack for Firecrawl integration
+# Connects to the "backend" docker network that Firecrawl already manages,
+# so Firecrawl's api container can reach SearXNG at http://searxng-core:8080
+# without exposing it on the host.
+#
+# Usage on VM 1 (after Firecrawl stack is already running):
+#   cd ~/.services/searxng             # copy this stack/ dir here
+#   cp .env.example .env                # then edit SEARXNG_SECRET
+#   docker compose up -d
+#   # test:
+#   docker exec firecrawl-api-1 curl -sS 'http://searxng-core:8080/search?q=firecrawl&format=json' | head -c 500
+name: searxng
+
+services:
+  valkey:
+    container_name: searxng-valkey
+    image: docker.io/valkey/valkey:9-alpine
+    command: valkey-server --save 30 1 --loglevel warning
+    restart: unless-stopped
+    volumes:
+      - valkey-data:/data/
+    networks:
+      - backend
+
+  searxng-core:
+    container_name: searxng-core
+    image: docker.io/searxng/searxng:${SEARXNG_VERSION:-latest}
+    restart: unless-stopped
+    # NOTE: no `ports:` here. SearXNG is only reachable from containers on
+    # the shared "backend" network. Firecrawl-api resolves it as
+    # http://searxng-core:8080. Expose externally only if you put a TLS
+    # reverse proxy in front.
+    env_file: ./.env
+    volumes:
+      - ./core-config:/etc/searxng
+      - core-data:/var/cache/searxng/
+    depends_on:
+      - valkey
+    networks:
+      - backend
+
+volumes:
+  core-data:
+  valkey-data:
+
+networks:
+  backend:
+    name: backend
+    external: true

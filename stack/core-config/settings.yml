@@ -1,0 +1,51 @@
+# Inherit upstream defaults (limiter, image proxy, etc.) and override
+# only what we care about: a curated set of 5 engines and disabled
+# engine rotating so requests stick to the same backend (helps with
+# rate-limit consistency from a residential IP).
+use_default_settings: true
+
+server:
+  # secret_key is overwritten by $SEARXNG_SECRET at container start.
+  secret_key: "ultrasecretkey"
+  image_proxy: true
+  # Bind only inside the docker network; no external access.
+  bind_address: "0.0.0.0"
+  port: 8080
+
+general:
+  instance_name: "Hermes Search"
+
+search:
+  safe_search: 0
+  autocomplete: "google"
+  default_lang: "en"
+  formats:
+    - html
+    - json
+
+# Disable SearXNG's built-in limiter to keep stack simple; we have one
+# client (Firecrawl-api) and rate limiting happens upstream via
+# Firecrawl's CRAWL_CONCURRENT_REQUESTS knob.
+# limiter: false
+
+# Valkey for limiter/bot detection (set in env via SEARXNG_VALKEY_URL).
+valkey:
+  url: valkey://valkey:6379/0
+
+# Curated engines. Mirrors Firecrawl .env SEARXNG_ENGINES.
+engines:
+  - name: google
+    disabled: false
+    shortcut: go
+  - name: bing
+    disabled: false
+    shortcut: bi
+  - name: duckduckgo
+    disabled: false
+    shortcut: ddg
+  - name: brave
+    disabled: false
+    shortcut: br
+  - name: startpage
+    disabled: false
+    shortcut: sp
