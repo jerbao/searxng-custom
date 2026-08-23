@@ -20,7 +20,7 @@ name: searxng
 
 x-sxng-build-common: &sxng-build-common
   context: ..        # repo root (one above stack/, where this file lives)
-  dockerfile: container/dist.dockerfile
+  dockerfile: stack/Dockerfile
 
 services:
   valkey:
