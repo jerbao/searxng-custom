@@ -33,6 +33,12 @@ valkey:
   url: valkey://valkey:6379/0
 
 # Curated engines. Mirrors Firecrawl .env SEARXNG_ENGINES.
+# Wikidata removed: it 403s with suspended_time=180 on first boot
+# (SearXNG hits it before our curated engines settle).
+use_default_settings:
+  engines:
+    remove:
+      - wikidata
 engines:
   - name: google
     disabled: false
