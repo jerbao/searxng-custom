@@ -23,6 +23,8 @@ gh-pages/
 
 .idea/
 
+.env*
+
 searx/version_frozen.py
 .dir-locals.el
 
