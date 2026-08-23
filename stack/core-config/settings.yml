@@ -1,14 +1,14 @@
 # Inherit upstream defaults (limiter, image proxy, etc.) and override
-# only what we care about: a curated set of 5 engines and disabled
-# engine rotating so requests stick to the same backend (helps with
-# rate-limit consistency from a residential IP).
-use_default_settings: true
+# only what we care about: a curated set of engines plus the Wikimedia
+# User-Agent suffix.
+use_default_settings:
+  outgoing:
+    useragent_suffix: "(self-hosted; hermes-search; mailto:admin@localhost)"
 
 server:
   # secret_key is overwritten by $SEARXNG_SECRET at container start.
   secret_key: "ultrasecretkey"
   image_proxy: true
-  # Bind only inside the docker network; no external access.
   bind_address: "0.0.0.0"
   port: 8080
 
@@ -23,22 +23,11 @@ search:
     - html
     - json
 
-# Disable SearXNG's built-in limiter to keep stack simple; we have one
-# client (Firecrawl-api) and rate limiting happens upstream via
-# Firecrawl's CRAWL_CONCURRENT_REQUESTS knob.
-# limiter: false
-
 # Valkey for limiter/bot detection (set in env via SEARXNG_VALKEY_URL).
 valkey:
   url: valkey://valkey:6379/0
 
 # Curated engines. Mirrors Firecrawl .env SEARXNG_ENGINES.
-# Wikidata removed: it 403s with suspended_time=180 on first boot
-# (SearXNG hits it before our curated engines settle).
-use_default_settings:
-  engines:
-    remove:
-      - wikidata
 engines:
   - name: google
     disabled: false
@@ -55,3 +44,9 @@ engines:
   - name: startpage
     disabled: false
     shortcut: sp
+  - name: wikidata
+    disabled: false
+    shortcut: wd
+  - name: wikipedia
+    disabled: false
+    shortcut: wp
