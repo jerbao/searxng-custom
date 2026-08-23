@@ -44,6 +44,10 @@ volumes:
   valkey-data:
 
 networks:
+  # Firecrawl's docker-compose declares `networks.backend` without `name:`,
+  # so Compose names it `firecrawl_backend` (project_name + network_name).
+  # We join that same network so the Firecrawl api container can reach
+  # SearXNG at http://searxng-core:8080 without exposing it on the host.
   backend:
-    name: backend
+    name: firecrawl_backend
     external: true
