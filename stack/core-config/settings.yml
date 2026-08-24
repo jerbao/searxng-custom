@@ -6,9 +6,12 @@ use_default_settings:
     useragent_suffix: "(self-hosted; hermes-search; mailto:admin@localhost)"
 
 server:
-  # secret_key is overwritten by $SEARXNG_SECRET at container start.
-  secret_key: "ultrasecretkey"
-  image_proxy: true
+  # Internal docker network only, consumed via JSON by Firecrawl: no
+  # browser sessions and no image proxy, so nothing consumes the HMAC
+  # derived from this key. It only has to differ from the upstream
+  # "ultrasecretkey" default, which webapp.py rejects at startup.
+  secret_key: ""
+  image_proxy: false
   bind_address: "0.0.0.0"
   port: 8080
 
