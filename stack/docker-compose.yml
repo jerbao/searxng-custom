@@ -28,6 +28,17 @@ services:
     image: docker.io/valkey/valkey:9-alpine
     command: valkey-server --save 30 1 --loglevel warning
     restart: unless-stopped
+    # PING is the authoritative liveness for a Redis-protocol server —
+    # TCP-connect alone would not prove it accepts commands. The service
+    # has no --requirepass in its command and no env_file, so `ping`
+    # returns PONG in <1ms. valkey-cli (native) preferred over the
+    # redis-cli shim also present in the image.
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
     volumes:
       - valkey-data:/data/
     networks:
@@ -51,6 +62,17 @@ services:
       - core-data:/var/cache/searxng/
     depends_on:
       - valkey
+    # GNU wget 1.25.0 confirmed present in image; curl absent. /healthz
+    # returns 200 "OK" without depending on engines or rate-limiter
+    # state, so the probe stays accurate even under load. -T 4 returns
+    # non-zero just before Docker's 5s probe timeout fires, giving a
+    # clean timeout signal instead of "killed by docker".
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "-T", "4", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
     networks:
       - backend
 
