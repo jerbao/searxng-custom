@@ -30,8 +30,12 @@ search:
 valkey:
   url: valkey://valkey:6379/0
 
-# Curated engines. Mirrors Firecrawl .env SEARXNG_ENGINES.
+# Curated engines. Original 7 (enabled by Firecrawl upstream setup) plus
+# 23 engines empirically validated as functional in the 2026-08-26 audit
+# (probe v1 results >= 20 OR parseable by parser-corrected v2). Names match
+# the `name:` field in /config verbatim; no slug aliases invented.
 engines:
+  # ── Original 7 (unchanged) ────────────────────────────────────────
   - name: google
     disabled: false
     shortcut: go
@@ -53,3 +57,59 @@ engines:
   - name: wikipedia
     disabled: false
     shortcut: wp
+
+  # ── HuggingFace trio (1000/788 results in probe v1) ───────────────
+  - name: huggingface
+    disabled: false
+  - name: huggingface spaces
+    disabled: false
+  - name: huggingface datasets
+    disabled: false
+
+  # ── High-confidence code/repo engines ──────────────────────────────
+  - name: mwmbl
+    disabled: false
+  - name: lib.rs
+    disabled: false
+  - name: hackernews
+    disabled: false
+  - name: pkg.go.dev
+    disabled: false
+  - name: npm
+    disabled: false
+  - name: discuss.python
+    disabled: false
+  - name: microsoft learn
+    disabled: false
+  - name: national vulnerability database
+    disabled: false
+
+  # ── Media/image engines with validated results ────────────────────
+  - name: uxwing
+    disabled: false
+  - name: magnific
+    disabled: false
+  - name: findthatmeme
+    disabled: false
+  - name: stocksnap
+    disabled: false
+  - name: frinkiac
+    disabled: false
+  - name: apple app store
+    disabled: false
+  - name: duckduckgo images
+    disabled: false
+  - name: duckduckgo videos
+    disabled: false
+  - name: flickr
+    disabled: false
+  - name: pexels
+    disabled: false
+  - name: hoogle
+    disabled: false
+  - name: crowdview
+    disabled: false
+  - name: ina
+    disabled: false
+  - name: duden
+    disabled: false
